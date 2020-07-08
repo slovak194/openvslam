@@ -217,7 +217,8 @@ void map_database::register_keyframe(camera_database* cam_db, bow_vocabulary* bo
     const auto timestamp = json_keyfrm.at("ts").get<double>();
     const auto camera_name = json_keyfrm.at("cam").get<std::string>();
     const auto camera = cam_db->get_camera(camera_name);
-    const auto depth_thr = json_keyfrm.at("depth_thr").get<float>();
+    const auto depth_thr_max = json_keyfrm.at("depth_thr_max").get<float>();
+    const auto depth_thr_min = json_keyfrm.at("depth_thr_min").get<float>();
 
     // Pose information
     const Mat33_t rot_cw = convert_json_to_rotation(json_keyfrm.at("rot_cw"));
@@ -254,7 +255,7 @@ void map_database::register_keyframe(camera_database* cam_db, bow_vocabulary* bo
     const auto scale_factor = json_keyfrm.at("scale_factor").get<float>();
 
     // Construct a new object
-    auto keyfrm = new data::keyframe(id, src_frm_id, timestamp, cam_pose_cw, camera, depth_thr,
+    auto keyfrm = new data::keyframe(id, src_frm_id, timestamp, cam_pose_cw, camera, depth_thr_max, depth_thr_min,
                                      num_keypts, keypts, undist_keypts, bearings, stereo_x_right, depths, descriptors,
                                      num_scale_levels, scale_factor, bow_vocab, bow_db, this);
 

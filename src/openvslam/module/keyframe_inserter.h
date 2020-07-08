@@ -19,7 +19,7 @@ namespace module {
 
 class keyframe_inserter {
 public:
-    keyframe_inserter(const camera::setup_type_t setup_type, const float true_depth_thr,
+    keyframe_inserter(const camera::setup_type_t setup_type, const float true_depth_thr_max,
                       data::map_database* map_db, data::bow_database* bow_db,
                       const unsigned int min_num_frms, const unsigned int max_num_frms);
 
@@ -49,7 +49,7 @@ private:
     //! setup type of the tracking camera
     const camera::setup_type_t setup_type_;
     //! depth threshold in metric scale
-    const float true_depth_thr_;
+    const float true_depth_thr_max_;
 
     //! map database
     data::map_database* map_db_ = nullptr;

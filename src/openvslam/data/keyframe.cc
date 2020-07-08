@@ -21,7 +21,7 @@ keyframe::keyframe(const frame& frm, map_database* map_db, bow_database* bow_db)
     : // meta information
       id_(next_id_++), src_frm_id_(frm.id_), timestamp_(frm.timestamp_),
       // camera parameters
-      camera_(frm.camera_), depth_thr_(frm.depth_thr_),
+      camera_(frm.camera_), depth_thr_max_(frm.depth_thr_max_), depth_thr_min_(frm.depth_thr_min_),
       // constant observations
       num_keypts_(frm.num_keypts_), keypts_(frm.keypts_), undist_keypts_(frm.undist_keypts_), bearings_(frm.bearings_),
       keypt_indices_in_cells_(frm.keypt_indices_in_cells_),
@@ -43,7 +43,7 @@ keyframe::keyframe(const frame& frm, map_database* map_db, bow_database* bow_db)
 }
 
 keyframe::keyframe(const unsigned int id, const unsigned int src_frm_id, const double timestamp,
-                   const Mat44_t& cam_pose_cw, camera::base* camera, const float depth_thr,
+                   const Mat44_t& cam_pose_cw, camera::base* camera, const float depth_thr_max, const float depth_thr_min,
                    const unsigned int num_keypts, const std::vector<cv::KeyPoint>& keypts,
                    const std::vector<cv::KeyPoint>& undist_keypts, const eigen_alloc_vector<Vec3_t>& bearings,
                    const std::vector<float>& stereo_x_right, const std::vector<float>& depths, const cv::Mat& descriptors,
@@ -52,7 +52,7 @@ keyframe::keyframe(const unsigned int id, const unsigned int src_frm_id, const d
     : // meta information
       id_(id), src_frm_id_(src_frm_id), timestamp_(timestamp),
       // camera parameters
-      camera_(camera), depth_thr_(depth_thr),
+      camera_(camera), depth_thr_max_(depth_thr_max), depth_thr_min_(depth_thr_min),
       // constant observations
       num_keypts_(num_keypts), keypts_(keypts), undist_keypts_(undist_keypts), bearings_(bearings),
       keypt_indices_in_cells_(assign_keypoints_to_grid(camera, undist_keypts)),
@@ -114,7 +114,8 @@ nlohmann::json keyframe::to_json() const {
     return {{"src_frm_id", src_frm_id_},
             {"ts", timestamp_},
             {"cam", camera_->name_},
-            {"depth_thr", depth_thr_},
+            {"depth_thr_max", depth_thr_max_},
+            {"depth_thr_min", depth_thr_min_},
             // camera pose
             {"rot_cw", convert_rotation_to_json(cam_pose_cw_.block<3, 3>(0, 0))},
             {"trans_cw", convert_translation_to_json(cam_pose_cw_.block<3, 1>(0, 3))},

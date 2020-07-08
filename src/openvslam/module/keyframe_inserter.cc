@@ -7,10 +7,10 @@
 namespace openvslam {
 namespace module {
 
-keyframe_inserter::keyframe_inserter(const camera::setup_type_t setup_type, const float true_depth_thr,
+keyframe_inserter::keyframe_inserter(const camera::setup_type_t setup_type, const float true_depth_thr_max,
                                      data::map_database* map_db, data::bow_database* bow_db,
                                      const unsigned int min_num_frms, const unsigned int max_num_frms)
-    : setup_type_(setup_type), true_depth_thr_(true_depth_thr),
+    : setup_type_(setup_type), true_depth_thr_max_(true_depth_thr_max),
       map_db_(map_db), bow_db_(bow_db),
       min_num_frms_(min_num_frms), max_num_frms_(max_num_frms) {}
 
@@ -122,7 +122,7 @@ data::keyframe* keyframe_inserter::insert_new_keyframe(data::frame& curr_frm) {
         const auto idx = depth_idx_pairs.at(count).second;
 
         // 最小閾値以上の点が追加されて，かつdepthの範囲が敷居を超えたら追加をやめる
-        if (min_num_to_create < count && true_depth_thr_ < depth) {
+        if (min_num_to_create < count && true_depth_thr_max_ < depth) {
             break;
         }
 

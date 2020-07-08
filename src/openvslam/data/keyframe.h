@@ -55,7 +55,7 @@ public:
      * (NOTE: some variables must be recomputed after the construction. See the definition.)
      */
     keyframe(const unsigned int id, const unsigned int src_frm_id, const double timestamp,
-             const Mat44_t& cam_pose_cw, camera::base* camera, const float depth_thr,
+             const Mat44_t& cam_pose_cw, camera::base* camera, const float depth_thr_max, const float depth_thr_min,
              const unsigned int num_keypts, const std::vector<cv::KeyPoint>& keypts,
              const std::vector<cv::KeyPoint>& undist_keypts, const eigen_alloc_vector<Vec3_t>& bearings,
              const std::vector<float>& stereo_x_right, const std::vector<float>& depths, const cv::Mat& descriptors,
@@ -228,7 +228,9 @@ public:
     //! camera model
     camera::base* camera_;
     //! depth threshold
-    const float depth_thr_;
+    const float depth_thr_max_;
+    //! depth threshold
+    const float depth_thr_min_;
 
     //-----------------------------------------
     // constant observations

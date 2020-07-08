@@ -79,18 +79,27 @@ config::config(const YAML::Node& yaml_node, const std::string& config_file_path)
         switch (camera_->model_type_) {
             case camera::model_type_t::Perspective: {
                 auto camera = static_cast<camera::perspective*>(camera_);
-                true_depth_thr_ = camera->true_baseline_ * depth_thr_factor;
+                true_depth_thr_max_ = camera->true_baseline_ * depth_thr_factor;
                 break;
             }
             case camera::model_type_t::Fisheye: {
                 auto camera = static_cast<camera::fisheye*>(camera_);
-                true_depth_thr_ = camera->true_baseline_ * depth_thr_factor;
+                true_depth_thr_max_ = camera->true_baseline_ * depth_thr_factor;
                 break;
             }
             case camera::model_type_t::Equirectangular: {
                 throw std::runtime_error("Not implemented: Stereo or RGBD of equirectangular camera model");
             }
         }
+
+      // allow user to overwrite with directly specified true depth threshold in [meters]
+      const auto true_depth_thr = yaml_node_["Camera.true_depth_threshold_max"].as<double>(-1.0);
+        if (true_depth_thr > 0) {
+        this->true_depth_thr_max_ = true_depth_thr;
+      }
+
+      this->true_depth_thr_min_ = yaml_node_["Camera.true_depth_threshold_min"].as<double>(0.0);
+
     }
 
     spdlog::debug("load depthmap factor");
@@ -116,8 +125,8 @@ std::ostream& operator<<(std::ostream& os, const config& cfg) {
     if (cfg.camera_->setup_type_ == camera::setup_type_t::Stereo || cfg.camera_->setup_type_ == camera::setup_type_t::RGBD) {
         std::cout << "Stereo Configuration:" << std::endl;
         std::cout << "- true baseline: " << cfg.camera_->true_baseline_ << std::endl;
-        std::cout << "- true depth threshold: " << cfg.true_depth_thr_ << std::endl;
-        std::cout << "- depth threshold factor: " << cfg.true_depth_thr_ / cfg.camera_->true_baseline_ << std::endl;
+        std::cout << "- true depth threshold max: " << cfg.true_depth_thr_max_ << std::endl;
+        std::cout << "- depth threshold factor max: " << cfg.true_depth_thr_max_ / cfg.camera_->true_baseline_ << std::endl;
     }
     if (cfg.camera_->setup_type_ == camera::setup_type_t::RGBD) {
         std::cout << "Depth Image Configuration:" << std::endl;

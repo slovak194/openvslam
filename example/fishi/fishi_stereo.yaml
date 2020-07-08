@@ -34,6 +34,9 @@ Camera.cols: 2448
 Camera.rows: 2058
 Camera.focal_x_baseline: 78.89615272630417
 
+Camera.true_depth_threshold_max: 1.0
+Camera.true_depth_threshold_min: 0.15
+
 Camera.color_order: "RGB"
 
 #======================#
