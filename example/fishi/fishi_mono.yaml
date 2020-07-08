@@ -55,3 +55,11 @@ PangolinViewer.viewpoint_x: 0
 PangolinViewer.viewpoint_y: -0.65
 PangolinViewer.viewpoint_z: -1.9
 PangolinViewer.viewpoint_f: 400
+
+#===========================#
+# SocketPublisher Parameters #
+#===========================#
+
+SocketPublisher.server_uri: "http://192.168.2.1:3000"
+SocketPublisher.emitting_interval: 15000
+SocketPublisher.image_quality: 20

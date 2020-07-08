@@ -50,7 +50,7 @@ function init() {
     graphicStats = new Stats();
     graphicStats.setMode(0); // 0: fps, 1: ms
     graphicStats.domElement.style.position = "absolute";
-    graphicStats.domElement.style.left = "0px";
+    graphicStats.domElement.style.left = "96px";
     graphicStats.domElement.style.top = "0px";
     document.getElementById("Stats-output").appendChild(graphicStats.domElement);
 
@@ -59,7 +59,7 @@ function init() {
     trackStats = new Stats();
     trackStats.setMode(0);
     trackStats.domElement.style.position = "alsolute";
-    trackStats.domElement.style.left = "0px";
+    trackStats.domElement.style.left = "96px";
     trackStats.domElement.style.top = "48px";
     document.getElementById("Stats-output").appendChild(trackStats.domElement);
 
@@ -386,14 +386,14 @@ function onResize() {
 }
 
 let thumbEnlarge = false; // if thumbnail is clicked, that is enlarged and this flag is set
-const THUMB_SCALING = 3; // thumbnail scaling magnification
+const THUMB_SCALING = 9; // thumbnail scaling magnification
 const THUMB_HEIGHT = 96; // normally thumbnail height (width is doubled height)
-const CANVAS_SIZE = [1024, 500]; // thumbnail image resolution
+const CANVAS_SIZE = [1024, 1024]; // thumbnail image resolution
 function initTumbnail() {
     let thumb = document.getElementById("thumb");
-    thumb.style.width = THUMB_HEIGHT * 2 + 'px';
+    thumb.style.width = THUMB_HEIGHT + 'px';
     thumb.style.height = THUMB_HEIGHT + 'px';
-    thumb.style.transition = 'all 0.5s ease-in-out'; // enable animation when enlarge and shrinking
+//     thumb.style.transition = 'all 0.5s ease-in-out'; // enable animation when enlarge and shrinking
     thumb.style.zIndex = '10001'; // thumbnail is drawn over two stats
     thumb.setAttribute("width", CANVAS_SIZE[0]);
     thumb.setAttribute("height", CANVAS_SIZE[1]);
@@ -407,7 +407,7 @@ function onThumbClick() {
         document.getElementById("thumb").style.transform = 'translate(0px, 0px) scale(1)';
     }
     else {
-        let x = THUMB_HEIGHT * (THUMB_SCALING - 1);
+        let x = THUMB_HEIGHT / 2 * (THUMB_SCALING - 1);
         let y = THUMB_HEIGHT / 2 * (THUMB_SCALING - 1);
         document.getElementById("thumb").style.transform = 'translate(' + x + 'px, ' + y + 'px) scale(' + THUMB_SCALING + ')';
     }
