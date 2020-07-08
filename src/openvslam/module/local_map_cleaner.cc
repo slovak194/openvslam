@@ -126,7 +126,7 @@ void local_map_cleaner::count_redundant_observations(data::keyframe* keyfrm, uns
 
         // if depth is within the valid range, it won't be considered
         const auto depth = keyfrm->depths_.at(idx);
-        if (!is_monocular_ && (depth < 0.0 || keyfrm->depth_thr_max_ < depth)) {
+        if (!is_monocular_ && (depth < keyfrm->depth_thr_min_ || depth > keyfrm->depth_thr_max_)) {
             continue;
         }
 
