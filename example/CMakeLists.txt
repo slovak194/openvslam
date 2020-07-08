@@ -38,6 +38,9 @@ set(EXECUTABLE_TARGETS "")
 add_executable(run_camera_slam run_camera_slam.cc)
 list(APPEND EXECUTABLE_TARGETS run_camera_slam)
 
+add_executable(run_fishi_slam run_fishi_slam.cc)
+list(APPEND EXECUTABLE_TARGETS run_fishi_slam)
+
 add_executable(run_camera_localization run_camera_localization.cc)
 list(APPEND EXECUTABLE_TARGETS run_camera_localization)
 
