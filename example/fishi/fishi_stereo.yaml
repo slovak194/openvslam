@@ -58,11 +58,11 @@ StereoRectifier.R_right: [0.9997511073367459, -0.021004783833106545, 0.007518140
 # ORB Parameters #
 #================#
 
-Feature.max_num_keypoints: 1000
-Feature.scale_factor: 1.5
+Feature.max_num_keypoints: 2000
+Feature.scale_factor: 1.6
 Feature.num_levels: 8
-Feature.ini_fast_threshold: 20
-Feature.min_fast_threshold: 7
+Feature.ini_fast_threshold: 5
+Feature.min_fast_threshold: 2
 
 #========================#
 # Initializer Parameters #

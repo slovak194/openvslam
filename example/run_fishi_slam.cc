@@ -29,7 +29,7 @@
 void mono_tracking(const std::shared_ptr<openvslam::config>& cfg,
                    const std::string& vocab_file_path, const std::string& video_file_path, const std::string& mask_img_path,
                    const unsigned int frame_skip, const bool no_sleep, const bool auto_term,
-                   const bool eval_log, const std::string& map_db_path) {
+                   const bool eval_log, const std::string& map_db_path, unsigned int start_time) {
   // load the mask image
   const cv::Mat mask = mask_img_path.empty() ? cv::Mat{} : cv::imread(mask_img_path, cv::IMREAD_GRAYSCALE);
 
@@ -55,6 +55,12 @@ void mono_tracking(const std::shared_ptr<openvslam::config>& cfg,
   unsigned int num_frame = 0;
 
   bool is_not_end = true;
+
+  while (static_cast<double >(num_frame) / cfg->camera_->fps_ < start_time) {
+    is_not_end = video.read(frame);
+    ++num_frame;
+  }
+
   // run the SLAM in another thread
   std::thread thread([&]() {
     while (is_not_end) {
@@ -149,7 +155,7 @@ void mono_tracking(const std::shared_ptr<openvslam::config>& cfg,
 void stereo_tracking(const std::shared_ptr<openvslam::config>& cfg,
                    const std::string& vocab_file_path, const std::string& video_file_path_1, const std::string& video_file_path_2, const std::string& mask_img_path,
                    const unsigned int frame_skip, const bool no_sleep, const bool auto_term,
-                   const bool eval_log, const std::string& map_db_path) {
+                   const bool eval_log, const std::string& map_db_path, unsigned int start_time) {
   // load the mask image
   const cv::Mat mask = mask_img_path.empty() ? cv::Mat{} : cv::imread(mask_img_path, cv::IMREAD_GRAYSCALE);
 
@@ -179,9 +185,15 @@ void stereo_tracking(const std::shared_ptr<openvslam::config>& cfg,
 
   const openvslam::util::stereo_rectifier rectifier(cfg);
 
+  bool is_not_end = true;
   unsigned int num_frame = 0;
 
-  bool is_not_end = true;
+  while (static_cast<double >(num_frame) / cfg->camera_->fps_ < start_time) {
+    is_not_end = video_1.read(frames[0]);
+    is_not_end = video_2.read(frames[1]);
+    ++num_frame;
+  }
+
   // run the SLAM in another thread
   std::thread thread([&]() {
     while (is_not_end) {
@@ -300,6 +312,7 @@ int main(int argc, char* argv[]) {
   auto config_file_path = op.add<popl::Value<std::string>>("c", "config", "config file path");
   auto mask_img_path = op.add<popl::Value<std::string>>("", "mask", "mask image path", "");
   auto frame_skip = op.add<popl::Value<unsigned int>>("", "frame-skip", "interval of frame skip", 1);
+  auto start_time = op.add<popl::Value<unsigned int>>("", "start-time", "start time seconds", 0);
   auto no_sleep = op.add<popl::Switch>("", "no-sleep", "not wait for next frame in real time");
   auto auto_term = op.add<popl::Switch>("", "auto-term", "automatically terminate the viewer");
   auto debug_mode = op.add<popl::Switch>("", "debug", "debug mode");
@@ -354,12 +367,12 @@ int main(int argc, char* argv[]) {
   if (cfg->camera_->setup_type_ == openvslam::camera::setup_type_t::Monocular) {
     mono_tracking(cfg, vocab_file_path->value(), video_file_path_1->value(), mask_img_path->value(),
                   frame_skip->value(), no_sleep->is_set(), auto_term->is_set(),
-                  eval_log->is_set(), map_db_path->value());
+                  eval_log->is_set(), map_db_path->value(), start_time->value());
   }
   else if (cfg->camera_->setup_type_ == openvslam::camera::setup_type_t::Stereo) {
     stereo_tracking(cfg, vocab_file_path->value(), video_file_path_1->value(), video_file_path_2->value(), mask_img_path->value(),
                     frame_skip->value(), no_sleep->is_set(), auto_term->is_set(),
-                    eval_log->is_set(), map_db_path->value());
+                    eval_log->is_set(), map_db_path->value(), start_time->value());
   }
   else {
     throw std::runtime_error("Invalid setup type: " + cfg->camera_->get_setup_type_string());
