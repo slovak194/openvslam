@@ -132,7 +132,7 @@ set(USE_SOCKET_PUBLISHER OFF CACHE BOOL "Enable Socket Publisher")
 
 add_subdirectory(src)
 
-set(BUILD_EXAMPLES ON CACHE BOOL "Build examples")
+set(BUILD_EXAMPLES OFF CACHE BOOL "Build examples")
 if(BUILD_EXAMPLES)
     add_subdirectory(example)
 endif()
