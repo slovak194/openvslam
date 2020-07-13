@@ -483,7 +483,12 @@ std::list<orb_extractor_node> orb_extractor::initialize_nodes(const std::vector<
     // The number of columns or rows
     unsigned int num_x_grid, num_y_grid;
 
-    if (ratio > 1) {
+    if ((max_y - min_y) == 0) {
+        num_x_grid = 0;
+        num_y_grid = 0;
+        delta_x = 0;
+        delta_y = 0;
+    } else if (ratio > 1) {
         // If the aspect ratio is greater than 1, the patches are made in a horizontal direction
         num_x_grid = std::round(ratio);
         num_y_grid = 1;
