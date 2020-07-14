@@ -28,14 +28,6 @@ namespace feature {
 class orb_extractor;
 } // namespace feature
 
-// tracker state
-enum class tracker_state_t {
-    NotInitialized,
-    Initializing,
-    Tracking,
-    Lost
-};
-
 class tracking_module {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW

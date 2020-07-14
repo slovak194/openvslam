@@ -143,6 +143,9 @@ public:
     //!! Termination of the system is requested or not
     bool terminate_is_requested() const;
 
+    //!! Get current tracking state
+    tracker_state_t get_tracking_state() const;
+
 private:
     //! Check reset request of the system
     void check_reset_request();
