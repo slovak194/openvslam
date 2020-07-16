@@ -160,6 +160,9 @@ public:
     //! current frame ID
     unsigned int id_;
 
+    //! current frame capture ID
+    unsigned int capture_id_;
+
     //! next frame ID
     static std::atomic<unsigned int> next_id_;
 

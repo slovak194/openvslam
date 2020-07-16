@@ -19,7 +19,7 @@ std::atomic<unsigned int> keyframe::next_id_{0};
 
 keyframe::keyframe(const frame& frm, map_database* map_db, bow_database* bow_db)
     : // meta information
-      id_(next_id_++), src_frm_id_(frm.id_), timestamp_(frm.timestamp_),
+      id_(next_id_++), capture_id_(frm.capture_id_), src_frm_id_(frm.id_), timestamp_(frm.timestamp_),
       // camera parameters
       camera_(frm.camera_), depth_thr_max_(frm.depth_thr_max_), depth_thr_min_(frm.depth_thr_min_),
       // constant observations
@@ -42,7 +42,7 @@ keyframe::keyframe(const frame& frm, map_database* map_db, bow_database* bow_db)
     set_cam_pose(frm.cam_pose_cw_);
 }
 
-keyframe::keyframe(const unsigned int id, const unsigned int src_frm_id, const double timestamp,
+keyframe::keyframe(const unsigned int id, const unsigned int src_frm_id, const double timestamp, const std::uint32_t capture_id,
                    const Mat44_t& cam_pose_cw, camera::base* camera, const float depth_thr_max, const float depth_thr_min,
                    const unsigned int num_keypts, const std::vector<cv::KeyPoint>& keypts,
                    const std::vector<cv::KeyPoint>& undist_keypts, const eigen_alloc_vector<Vec3_t>& bearings,
@@ -50,7 +50,7 @@ keyframe::keyframe(const unsigned int id, const unsigned int src_frm_id, const d
                    const unsigned int num_scale_levels, const float scale_factor,
                    bow_vocabulary* bow_vocab, bow_database* bow_db, map_database* map_db)
     : // meta information
-      id_(id), src_frm_id_(src_frm_id), timestamp_(timestamp),
+      id_(id), capture_id_(capture_id), src_frm_id_(src_frm_id), timestamp_(timestamp),
       // camera parameters
       camera_(camera), depth_thr_max_(depth_thr_max), depth_thr_min_(depth_thr_min),
       // constant observations
@@ -112,6 +112,7 @@ nlohmann::json keyframe::to_json() const {
     }
 
     return {{"src_frm_id", src_frm_id_},
+            {"capture_id", capture_id_},
             {"ts", timestamp_},
             {"cam", camera_->name_},
             {"depth_thr_max", depth_thr_max_},

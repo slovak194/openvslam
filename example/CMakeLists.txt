@@ -35,14 +35,8 @@ endif()
 
 set(EXECUTABLE_TARGETS "")
 
-
-if(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "aarch64")
-    add_executable(run_fishi_slam /home/nvidia/slovak/fishbot/test/slam/run_fishi_slam.cc)
-else(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "aarch64")
-    add_executable(run_fishi_slam /home/slovak/fishbot/test/slam/run_fishi_slam.cc)
-endif(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "aarch64")
-
-list(APPEND EXECUTABLE_TARGETS run_fishi_slam)
+#add_executable(run_fishi_slam /home/slovak/fishbot/test/slam/run_fishi_slam.cc)
+#list(APPEND EXECUTABLE_TARGETS run_fishi_slam)
 
 #add_executable(run_camera_slam run_camera_slam.cc)
 #list(APPEND EXECUTABLE_TARGETS run_camera_slam)

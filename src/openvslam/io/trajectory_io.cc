@@ -28,6 +28,7 @@ void trajectory_io::save_frame_trajectory(const std::string& path, const std::st
     const auto reference_keyframes = frm_stats.get_reference_keyframes();
     const auto rel_cam_poses_from_ref_keyfrms = frm_stats.get_relative_cam_poses();
     const auto timestamps = frm_stats.get_timestamps();
+    const auto capture_ids = frm_stats.get_capture_ids();
     const auto is_lost_frms = frm_stats.get_lost_frames();
 
     if (num_valid_frms == 0) {
@@ -93,6 +94,17 @@ void trajectory_io::save_frame_trajectory(const std::string& path, const std::st
                 << trans_wc(0) << " " << trans_wc(1) << " " << trans_wc(2) << " "
                 << quat_wc.x() << " " << quat_wc.y() << " " << quat_wc.z() << " " << quat_wc.w() << std::endl;
         }
+        else if (format == "FISHI") {
+          const Mat33_t& rot_wc = cam_pose_wc.block<3, 3>(0, 0);
+          const Vec3_t& trans_wc = cam_pose_wc.block<3, 1>(0, 3);
+          const Quat_t quat_wc = Quat_t(rot_wc);
+          ofs << std::setprecision(15)
+              << capture_ids.at(frm_id) << " "
+              << timestamps.at(frm_id) << " "
+              << std::setprecision(9)
+              << trans_wc(0) << " " << trans_wc(1) << " " << trans_wc(2) << " "
+              << quat_wc.x() << " " << quat_wc.y() << " " << quat_wc.z() << " " << quat_wc.w() << std::endl;
+        }
         else {
             throw std::runtime_error("Not implemented: trajectory format \"" + format + "\"");
         }
@@ -138,6 +150,7 @@ void trajectory_io::save_keyframe_trajectory(const std::string& path, const std:
         const Mat44_t cam_pose_cw = keyfrm->get_cam_pose();
         const Mat44_t cam_pose_wc = cam_pose_cw.inverse();
         const auto timestamp = keyfrm->timestamp_;
+        const auto capture_id = keyfrm->capture_id_;
 
         if (format == "KITTI") {
             ofs << std::setprecision(9)
@@ -154,6 +167,17 @@ void trajectory_io::save_keyframe_trajectory(const std::string& path, const std:
                 << std::setprecision(9)
                 << trans_wc(0) << " " << trans_wc(1) << " " << trans_wc(2) << " "
                 << quat_wc.x() << " " << quat_wc.y() << " " << quat_wc.z() << " " << quat_wc.w() << std::endl;
+        }
+        else if (format == "FISHI") {
+          const Mat33_t& rot_wc = cam_pose_wc.block<3, 3>(0, 0);
+          const Vec3_t& trans_wc = cam_pose_wc.block<3, 1>(0, 3);
+          const Quat_t quat_wc = Quat_t(rot_wc);
+          ofs << std::setprecision(15)
+              << capture_id << " "
+              << timestamp << " "
+              << std::setprecision(9)
+              << trans_wc(0) << " " << trans_wc(1) << " " << trans_wc(2) << " "
+              << quat_wc.x() << " " << quat_wc.y() << " " << quat_wc.z() << " " << quat_wc.w() << std::endl;
         }
         else {
             throw std::runtime_error("Not implemented: trajectory format \"" + format + "\"");

@@ -143,6 +143,43 @@ Mat44_t tracking_module::track_RGBD_image(const cv::Mat& img, const cv::Mat& dep
     return curr_frm_.cam_pose_cw_;
 }
 
+Mat44_t tracking_module::track_multi_image(const std::vector<cv::Mat> imgs, const std::vector<double> timestamps,
+    const std::vector<std::uint32_t> capture_ids, const cv::Mat& mask) {
+  const auto start = std::chrono::system_clock::now();
+
+  // color conversion
+  img_gray_ = imgs[2];
+
+  if (camera_->setup_type_ == camera::setup_type_t::Monocular) {
+    // create current frame object
+    if (tracking_state_ == tracker_state_t::NotInitialized || tracking_state_ == tracker_state_t::Initializing) {
+      curr_frm_ = data::frame(img_gray_, timestamps[2], ini_extractor_left_,
+                              bow_vocab_, camera_,
+                              cfg_->true_depth_thr_max_, cfg_->true_depth_thr_min_, mask);
+    }
+    else {
+      curr_frm_ = data::frame(img_gray_, timestamps[2], extractor_left_, bow_vocab_,
+                              camera_, cfg_->true_depth_thr_max_, cfg_->true_depth_thr_min_, mask);
+    }
+  } else if (camera_->setup_type_ == camera::setup_type_t::Stereo) {
+    curr_frm_ = data::frame(img_gray_, imgs[1], timestamps[2],
+                            extractor_left_, extractor_right_, bow_vocab_, camera_,
+                            cfg_->true_depth_thr_max_, cfg_->true_depth_thr_min_, mask);
+  } else {
+    // TODO, handle this
+  }
+
+  curr_frm_.capture_id_ = capture_ids[2]; // TODO, this is ugly but prevents frame interface from changes.
+
+  track();
+
+  const auto end = std::chrono::system_clock::now();
+  elapsed_ms_ = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+
+  return curr_frm_.cam_pose_cw_;
+}
+
+
 void tracking_module::reset() {
     spdlog::info("resetting system");
 

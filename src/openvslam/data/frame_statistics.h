@@ -69,6 +69,12 @@ public:
     std::map<unsigned int, double> get_timestamps() const;
 
     /**
+     * Get capture ids
+     * @return
+     */
+    std::map<unsigned int, unsigned int> get_capture_ids() const;
+
+    /**
      * Get lost frame flags
      * @return
      */
@@ -93,6 +99,8 @@ private:
     eigen_alloc_unord_map<unsigned int, Mat44_t> rel_cam_poses_from_ref_keyfrms_;
     //! Timestamp for each frame
     std::unordered_map<unsigned int, double> timestamps_;
+    //! Capture ids for each frame
+    std::unordered_map<unsigned int, unsigned int> capture_ids_;
     //! Flag whether each frame is lost or not
     std::unordered_map<unsigned int, bool> is_lost_frms_;
 };

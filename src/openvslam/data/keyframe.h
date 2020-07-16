@@ -54,7 +54,7 @@ public:
      * Constructor for map loading
      * (NOTE: some variables must be recomputed after the construction. See the definition.)
      */
-    keyframe(const unsigned int id, const unsigned int src_frm_id, const double timestamp,
+    keyframe(const unsigned int id, const unsigned int src_frm_id, const double timestamp, const std::uint32_t capture_id,
              const Mat44_t& cam_pose_cw, camera::base* camera, const float depth_thr_max, const float depth_thr_min,
              const unsigned int num_keypts, const std::vector<cv::KeyPoint>& keypts,
              const std::vector<cv::KeyPoint>& undist_keypts, const eigen_alloc_vector<Vec3_t>& bearings,
@@ -213,6 +213,8 @@ public:
 
     //! keyframe ID
     unsigned int id_;
+    //! keyframe capture ID
+    unsigned int capture_id_;
     //! next keyframe ID
     static std::atomic<unsigned int> next_id_;
 

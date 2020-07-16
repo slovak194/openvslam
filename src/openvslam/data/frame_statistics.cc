@@ -18,6 +18,7 @@ void frame_statistics::update_frame_statistics(const data::frame& frm, const boo
         rel_cam_poses_from_ref_keyfrms_[frm.id_] = rel_cam_pose_from_ref_keyfrm;
         assert(!timestamps_.count(frm.id_));
         timestamps_[frm.id_] = frm.timestamp_;
+        capture_ids_[frm.id_] = frm.capture_id_;
     }
 
     assert(!is_lost_frms_.count(frm.id_));
@@ -81,6 +82,10 @@ eigen_alloc_map<unsigned int, Mat44_t> frame_statistics::get_relative_cam_poses(
 
 std::map<unsigned int, double> frame_statistics::get_timestamps() const {
     return {timestamps_.begin(), timestamps_.end()};
+}
+
+std::map<unsigned int, unsigned int> frame_statistics::get_capture_ids() const {
+    return {capture_ids_.begin(), capture_ids_.end()};
 }
 
 std::map<unsigned int, bool> frame_statistics::get_lost_frames() const {

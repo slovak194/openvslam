@@ -254,8 +254,10 @@ void map_database::register_keyframe(camera_database* cam_db, bow_vocabulary* bo
     const auto num_scale_levels = json_keyfrm.at("n_scale_levels").get<unsigned int>();
     const auto scale_factor = json_keyfrm.at("scale_factor").get<float>();
 
+    const auto capture_id = json_keyfrm.at("capture_id").get<unsigned int>();
+
     // Construct a new object
-    auto keyfrm = new data::keyframe(id, src_frm_id, timestamp, cam_pose_cw, camera, depth_thr_max, depth_thr_min,
+    auto keyfrm = new data::keyframe(id, src_frm_id, timestamp, capture_id, cam_pose_cw, camera, depth_thr_max, depth_thr_min,
                                      num_keypts, keypts, undist_keypts, bearings, stereo_x_right, depths, descriptors,
                                      num_scale_levels, scale_factor, bow_vocab, bow_db, this);
 

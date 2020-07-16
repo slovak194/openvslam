@@ -72,7 +72,11 @@ public:
     //! (Note: RGB and Depth images must be aligned)
     Mat44_t track_RGBD_image(const cv::Mat& img, const cv::Mat& depthmap, const double timestamp, const cv::Mat& mask = cv::Mat{});
 
-    //-----------------------------------------
+    //! Track a multi frame
+    Mat44_t track_multi_image(const std::vector<cv::Mat> imgs, const std::vector<double> timestamps, const std::vector<std::uint32_t> capture_ids, const cv::Mat& mask = cv::Mat{});
+
+
+  //-----------------------------------------
     // management for reset process
 
     //! Reset the databases

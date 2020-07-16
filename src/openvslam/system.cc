@@ -247,6 +247,22 @@ Mat44_t system::feed_monocular_frame(const cv::Mat& img, const double timestamp,
     return cam_pose_cw;
 }
 
+Mat44_t system::feed_multi_frame(const std::vector<cv::Mat> imgs, const std::vector<double> timestamps,
+    const std::vector<std::uint32_t> capture_ids, const cv::Mat& mask) {
+//    assert(camera_->setup_type_ == camera::setup_type_t::Monocular);
+
+    check_reset_request();
+
+    const Mat44_t cam_pose_cw = tracker_->track_multi_image(imgs, timestamps, capture_ids, mask);
+
+    frame_publisher_->update(tracker_);
+    if (tracker_->tracking_state_ == tracker_state_t::Tracking) {
+        map_publisher_->set_current_cam_pose(cam_pose_cw);
+    }
+
+    return cam_pose_cw;
+}
+
 Mat44_t system::feed_stereo_frame(const cv::Mat& left_img, const cv::Mat& right_img, const double timestamp, const cv::Mat& mask) {
     assert(camera_->setup_type_ == camera::setup_type_t::Stereo);
 
