@@ -12,7 +12,7 @@ else()
     message(STATUS "Stack trace logger: DISABLED")
 endif()
 
-set(USE_GOOGLE_PERFTOOLS OFF CACHE BOOL "Enable profiler of google-perftools")
+set(USE_GOOGLE_PERFTOOLS ON CACHE BOOL "Enable profiler of google-perftools")
 if(USE_GOOGLE_PERFTOOLS)
     find_package(Gperftools REQUIRED)
     include_directories(${GPERFTOOLS_INCLUDE_DIRS})
@@ -35,32 +35,35 @@ endif()
 
 set(EXECUTABLE_TARGETS "")
 
-add_executable(run_camera_slam run_camera_slam.cc)
-list(APPEND EXECUTABLE_TARGETS run_camera_slam)
+add_executable(run_fishi_slam /home/slovak/fishbot/test/slam/run_fishi_slam.cc)
+list(APPEND EXECUTABLE_TARGETS run_fishi_slam)
 
-add_executable(run_camera_localization run_camera_localization.cc)
-list(APPEND EXECUTABLE_TARGETS run_camera_localization)
-
-add_executable(run_image_slam run_image_slam.cc util/image_util.cc)
-list(APPEND EXECUTABLE_TARGETS run_image_slam)
-
-add_executable(run_image_localization run_image_localization.cc util/image_util.cc)
-list(APPEND EXECUTABLE_TARGETS run_image_localization)
-
-add_executable(run_video_slam run_video_slam.cc)
-list(APPEND EXECUTABLE_TARGETS run_video_slam)
-
-add_executable(run_video_localization run_video_localization.cc)
-list(APPEND EXECUTABLE_TARGETS run_video_localization)
-
-add_executable(run_euroc_slam run_euroc_slam.cc util/euroc_util.cc)
-list(APPEND EXECUTABLE_TARGETS run_euroc_slam)
-
-add_executable(run_kitti_slam run_kitti_slam.cc util/kitti_util.cc)
-list(APPEND EXECUTABLE_TARGETS run_kitti_slam)
-
-add_executable(run_tum_rgbd_slam run_tum_rgbd_slam.cc util/tum_rgbd_util.cc)
-list(APPEND EXECUTABLE_TARGETS run_tum_rgbd_slam)
+#add_executable(run_camera_slam run_camera_slam.cc)
+#list(APPEND EXECUTABLE_TARGETS run_camera_slam)
+#
+#add_executable(run_camera_localization run_camera_localization.cc)
+#list(APPEND EXECUTABLE_TARGETS run_camera_localization)
+#
+#add_executable(run_image_slam run_image_slam.cc util/image_util.cc)
+#list(APPEND EXECUTABLE_TARGETS run_image_slam)
+#
+#add_executable(run_image_localization run_image_localization.cc util/image_util.cc)
+#list(APPEND EXECUTABLE_TARGETS run_image_localization)
+#
+#add_executable(run_video_slam run_video_slam.cc)
+#list(APPEND EXECUTABLE_TARGETS run_video_slam)
+#
+#add_executable(run_video_localization run_video_localization.cc)
+#list(APPEND EXECUTABLE_TARGETS run_video_localization)
+#
+#add_executable(run_euroc_slam run_euroc_slam.cc util/euroc_util.cc)
+#list(APPEND EXECUTABLE_TARGETS run_euroc_slam)
+#
+#add_executable(run_kitti_slam run_kitti_slam.cc util/kitti_util.cc)
+#list(APPEND EXECUTABLE_TARGETS run_kitti_slam)
+#
+#add_executable(run_tum_rgbd_slam run_tum_rgbd_slam.cc util/tum_rgbd_util.cc)
+#list(APPEND EXECUTABLE_TARGETS run_tum_rgbd_slam)
 
 foreach(EXECUTABLE_TARGET IN LISTS EXECUTABLE_TARGETS)
     # Set output directory for executables
