@@ -71,7 +71,7 @@ frame::frame(const cv::Mat& left_img_gray, const cv::Mat& right_img_gray, const 
     }
 
     // Undistort keypoints
-    camera_->undistort_keypoints(keypts_, undist_keypts_);
+    camera_->undistort_keypoints(keypts_, undist_keypts_);  // TODO, OLSLO, check  skip that
 
     // Estimate depth with stereo match
     match::stereo stereo_matcher(extractor_left->image_pyramid_, extractor_right_->image_pyramid_,

@@ -6,6 +6,9 @@ set(spdlog_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/3rd/spdlog/include)
 # json
 set(json_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/3rd/json/include)
 
+# sse2neon
+set(sse2neon_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/3rd/sse2neon/include)
+
 # g2o
 find_package(g2o REQUIRED
              COMPONENTS
@@ -60,7 +63,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 # ----- Compile configuration -----
 
 # OpenMP
-set(USE_OPENMP OFF CACHE BOOL "Use OpenMP")
+set(USE_OPENMP ON CACHE BOOL "Use OpenMP")
 if(USE_OPENMP)
     find_package(OpenMP)
     if(OpenMP_FOUND)
@@ -75,21 +78,31 @@ else()
     message(STATUS "OpenMP: DISABLED")
 endif()
 
-set(USE_SSE_ORB OFF CACHE BOOL "Enable SSE3 instruction for ORB extraction (-msse3)")
+set(USE_SSE_ORB ON CACHE BOOL "Enable SSE3 instruction for ORB extraction (-msse3)")
 if(USE_SSE_ORB)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse3")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse3")
-    target_compile_definitions(${PROJECT_NAME} PUBLIC USE_SSE_ORB)
-    message(STATUS "SSE3 for ORB extraction (-msse3): ENABLED")
+    if(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "aarch64")
+        target_compile_definitions(${PROJECT_NAME} PUBLIC USE_SSE_ORB)
+        target_compile_definitions(${PROJECT_NAME} PUBLIC USE_NEON_ORB)
+        message(STATUS "ARM NEON for ORB extraction (-mneon): ENABLED")
+    else(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "aarch64")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse3")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse3")
+        target_compile_definitions(${PROJECT_NAME} PUBLIC USE_SSE_ORB)
+        message(STATUS "SSE3 for ORB extraction (-msse3): ENABLED")
+    endif(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "aarch64")
 else()
     message(STATUS "SSE3 for ORB extraction (-msse3): DISABLED")
 endif()
 
-set(USE_SSE_FP_MATH OFF CACHE BOOL "Enable SSE instruction for floating-point operation (-mfpmath=sse)")
+set(USE_SSE_FP_MATH ON CACHE BOOL "Enable SSE instruction for floating-point operation (-mfpmath=sse)")
 if(USE_SSE_FP_MATH)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mfpmath=sse")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mfpmath=sse")
-    message(STATUS "SSE for floating-point operation (-mfpmath=sse): ENABLED")
+    if(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "aarch64")
+
+    else(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "aarch64")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mfpmath=sse")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mfpmath=sse")
+        message(STATUS "SSE for floating-point operation (-mfpmath=sse): ENABLED")
+    endif(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "aarch64")
 else()
     message(STATUS "SSE for floating-point operation (-mfpmath=sse): DISABLED")
 endif()
@@ -117,10 +130,12 @@ message(STATUS "BoW framework: ${BOW_FRAMEWORK} (found in ${BoW_INCLUDE_DIR})")
 target_include_directories(${PROJECT_NAME}
                            PUBLIC
                            $<BUILD_INTERFACE:${json_INCLUDE_DIR}>
+                           $<BUILD_INTERFACE:${sse2neon_INCLUDE_DIR}>
                            $<BUILD_INTERFACE:${spdlog_INCLUDE_DIR}>
                            $<BUILD_INTERFACE:${BoW_INCLUDE_DIR}>
                            $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/>
                            $<INSTALL_INTERFACE:include/openvslam/3rd/json/include>
+                           $<INSTALL_INTERFACE:include/openvslam/3rd/sse2neon/include>
                            $<INSTALL_INTERFACE:include/openvslam/3rd/spdlog/include>
                            $<INSTALL_INTERFACE:${BoW_INCLUDE_DIR}>
                            $<INSTALL_INTERFACE:include/>)
@@ -167,6 +182,8 @@ install(FILES ${HEADERS}
 # Install 3rd party headers
 install(FILES ${json_INCLUDE_DIR}/nlohmann/json.hpp ${json_INCLUDE_DIR}/nlohmann/json_fwd.hpp
         DESTINATION ${OPENVSLAM_INCLUDE_INSTALL_DIR}/3rd/json/include/nlohmann)
+install(FILES ${sse2neon_INCLUDE_DIR}/sse2neon.h
+        DESTINATION ${OPENVSLAM_INCLUDE_INSTALL_DIR}/3rd/sse2neon/include)
 install(DIRECTORY ${spdlog_INCLUDE_DIR}
         DESTINATION ${OPENVSLAM_INCLUDE_INSTALL_DIR}/3rd/spdlog)
 

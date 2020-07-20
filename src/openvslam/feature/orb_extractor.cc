@@ -41,6 +41,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <opencv2/imgproc.hpp>
 #include <opencv2/features2d.hpp>
 
+#ifdef USE_NEON_ORB
+#include <sse2neon.h>
+#else
+
 #ifdef USE_SSE_ORB
 #ifdef _MSC_VER
 #include <intrin.h>
@@ -48,6 +52,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <x86intrin.h>
 #endif
 #endif // USE_SSE_ORB
+
+#endif // USE_NEON_ORB
 
 namespace openvslam {
 namespace feature {
@@ -654,7 +660,8 @@ void orb_extractor::compute_orb_descriptor(const cv::KeyPoint& keypt, const cv::
 #ifdef USE_SSE_ORB
 #if !((defined _MSC_VER && defined _M_X64)                            \
       || (defined __GNUC__ && defined __x86_64__ && defined __SSE3__) \
-      || CV_SSE3)
+      || CV_SSE3 \
+      || USE_NEON_ORB)
 #error "The processor is not compatible with SSE. Please configure the CMake with -DUSE_SSE_ORB=OFF."
 #endif
 

@@ -12,7 +12,7 @@ else()
     message(STATUS "Stack trace logger: DISABLED")
 endif()
 
-set(USE_GOOGLE_PERFTOOLS ON CACHE BOOL "Enable profiler of google-perftools")
+set(USE_GOOGLE_PERFTOOLS OFF CACHE BOOL "Enable profiler of google-perftools")
 if(USE_GOOGLE_PERFTOOLS)
     find_package(Gperftools REQUIRED)
     include_directories(${GPERFTOOLS_INCLUDE_DIRS})
@@ -35,8 +35,13 @@ endif()
 
 set(EXECUTABLE_TARGETS "")
 
-#add_executable(run_fishi_slam /home/slovak/fishbot/test/slam/run_fishi_slam.cc)
-#list(APPEND EXECUTABLE_TARGETS run_fishi_slam)
+if(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "aarch64")
+
+else(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "aarch64")
+    add_executable(run_fishi_slam /home/slovak/fishbot/test/slam/run_fishi_slam.cc)
+    list(APPEND EXECUTABLE_TARGETS run_fishi_slam)
+endif(${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL "aarch64")
+
 
 #add_executable(run_camera_slam run_camera_slam.cc)
 #list(APPEND EXECUTABLE_TARGETS run_camera_slam)
