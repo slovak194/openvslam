@@ -339,9 +339,6 @@ bool tracking_module::track_current_frame() {
         }
     }
     else {
-
-        system_->request_reset(); // TODO, OLSLO, check for better place for this.
-
         // Lost mode
         // try to relocalize
         succeeded = relocalizer_.relocalize(curr_frm_);
