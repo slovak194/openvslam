@@ -2,6 +2,8 @@
 #include "openvslam/initialize/base.h"
 #include "openvslam/solve/triangulator.h"
 
+#include <spdlog/spdlog.h>
+
 namespace openvslam {
 namespace initialize {
 
@@ -55,8 +57,11 @@ bool base::find_most_plausible_pose(const eigen_alloc_vector<Mat33_t>& init_rots
     // get the index of the hypothesis
     const unsigned int max_num_valid_index = std::distance(nums_valid_pts.begin(), max_num_valid_pts_iter);
 
+    spdlog::trace("find_most_plausible_pose:");
+
     // reject if the number of 3D points does not fulfill the threshold
     if (*max_num_valid_pts_iter < min_num_triangulated_) {
+        spdlog::trace("\tmax_num_valid_pts_iter < min_num_triangulated_, {} < {}", *max_num_valid_pts_iter, min_num_triangulated_);
         return false;
     }
 
@@ -66,11 +71,13 @@ bool base::find_most_plausible_pose(const eigen_alloc_vector<Mat33_t>& init_rots
                                                 return 0.8 * (*max_num_valid_pts_iter) < num_valid_pts;
                                             });
     if (1 < num_similars) {
+        spdlog::trace("\t1 < num_similars");
         return false;
     }
 
     // reject if the parallax is too small
     if (init_parallax.at(max_num_valid_index) < parallax_deg_thr_) {
+        spdlog::trace("\tinit_parallax.at(max_num_valid_index) < parallax_deg_thr_");
         return false;
     }
 

@@ -56,15 +56,19 @@ bool perspective::initialize(const data::frame& cur_frm, const std::vector<int>&
     const auto score_F = fundamental_solver.get_best_score();
     const float rel_score_H = score_H / (score_H + score_F);
 
+
+    spdlog::trace("initialize:");
     // select a case according to the score
     if (0.40 < rel_score_H && homography_solver.solution_is_valid()) {
         const Mat33_t H_ref_to_cur = homography_solver.get_best_H_21();
         const auto is_inlier_match = homography_solver.get_inlier_matches();
+        spdlog::trace("\tinitialize: homography_solver, score: {}", score_H);
         return reconstruct_with_H(H_ref_to_cur, is_inlier_match);
     }
     else if (fundamental_solver.solution_is_valid()) {
         const Mat33_t F_ref_to_cur = fundamental_solver.get_best_F_21();
         const auto is_inlier_match = fundamental_solver.get_inlier_matches();
+        spdlog::trace("\tinitialize: fundamental_solver, score: {}", score_F);
         return reconstruct_with_F(F_ref_to_cur, is_inlier_match);
     }
     else {

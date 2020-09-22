@@ -22,7 +22,8 @@ tracking_module::tracking_module(const std::shared_ptr<config>& cfg, system* sys
                                  data::bow_vocabulary* bow_vocab, data::bow_database* bow_db)
     : cfg_(cfg), camera_(cfg->camera_), system_(system), map_db_(map_db), bow_vocab_(bow_vocab), bow_db_(bow_db),
       initializer_(cfg->camera_->setup_type_, map_db, bow_db, cfg->yaml_node_),
-      frame_tracker_(camera_, 10), relocalizer_(bow_db_), pose_optimizer_(),
+      frame_tracker_(camera_, 5/*10*/), // TODO, OLSLO, magic to config
+      relocalizer_(bow_db_), pose_optimizer_(),
       keyfrm_inserter_(cfg_->camera_->setup_type_, cfg_->true_depth_thr_max_, cfg_->true_depth_thr_min_, map_db, bow_db, 0, cfg_->camera_->fps_) {
     spdlog::debug("CONSTRUCT: tracking_module");
 
@@ -147,8 +148,10 @@ Mat44_t tracking_module::track_multi_image(const std::vector<cv::Mat> imgs, cons
     const std::vector<std::uint32_t> capture_ids, const cv::Mat& mask) {
   const auto start = std::chrono::system_clock::now();
 
+  constexpr int cam_id = 0;
+
   // color conversion
-  img_gray_ = imgs[2];
+  img_gray_ = imgs[cam_id];
 
   if (camera_->setup_type_ == camera::setup_type_t::Monocular) {
     // create current frame object
@@ -169,7 +172,7 @@ Mat44_t tracking_module::track_multi_image(const std::vector<cv::Mat> imgs, cons
     // TODO, handle this
   }
 
-  curr_frm_.capture_id_ = capture_ids[2]; // TODO, this is ugly but prevents frame interface from changes.
+  curr_frm_.capture_id_ = capture_ids[cam_id]; // TODO, this is ugly but prevents frame interface from changes.
 
   track();
 
@@ -336,6 +339,9 @@ bool tracking_module::track_current_frame() {
         }
     }
     else {
+
+        system_->request_reset();
+
         // Lost mode
         // try to relocalize
         succeeded = relocalizer_.relocalize(curr_frm_);
@@ -412,7 +418,8 @@ bool tracking_module::optimize_current_frame_with_local_map() {
         }
     }
 
-    constexpr unsigned int num_tracked_lms_thr = 20;
+    // TODO, OLSLO, magic to config
+    constexpr unsigned int num_tracked_lms_thr = 10/*20*/;
 
     // if recently relocalized, use the more strict threshold
     if (curr_frm_.id_ < last_reloc_frm_id_ + camera_->fps_ && num_tracked_lms_ < 2 * num_tracked_lms_thr) {
