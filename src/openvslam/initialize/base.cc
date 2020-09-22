@@ -68,10 +68,10 @@ bool base::find_most_plausible_pose(const eigen_alloc_vector<Mat33_t>& init_rots
     // reject if most plausible hypothesis is unclear
     const auto num_similars = std::count_if(nums_valid_pts.begin(), nums_valid_pts.end(),
                                             [max_num_valid_pts_iter](unsigned int num_valid_pts) {
-                                                return 0.8 * (*max_num_valid_pts_iter) < num_valid_pts;
+                                                return 0.8 * (*max_num_valid_pts_iter) < num_valid_pts; // TODO, OLSLO, magic to config
                                             });
     if (1 < num_similars) {
-        spdlog::trace("\t1 < num_similars");
+        spdlog::trace("\t1 < {}(num_similars)", num_similars);
         return false;
     }
 

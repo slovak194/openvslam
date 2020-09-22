@@ -33,22 +33,22 @@ bool keyframe_inserter::new_keyframe_is_needed(const data::frame& curr_frm, cons
     const auto num_keyfrms = map_db_->get_num_keyframes();
 
     // reference keyframeで観測している3次元点のうち，3視点以上から観測されている3次元点の数を数える
-    const unsigned int min_obs_thr = (3 <= num_keyfrms) ? 3 : 2;
+    const unsigned int min_obs_thr = (3 <= num_keyfrms) ? 3 : 2; // TODO, OLSLO, magic to config
     const auto num_reliable_lms = ref_keyfrm.get_num_tracked_landmarks(min_obs_thr);
 
     // mappingが処理中かどうか
     const bool mapper_is_idle = mapper_->get_keyframe_acceptability();
 
     // 最新のキーフレームで観測している3次元点数に対する，現在のフレームで観測している3次元点数の割合の閾値
-    constexpr unsigned int num_tracked_lms_thr = 15;
-    const float lms_ratio_thr = 0.9;
+    constexpr unsigned int num_tracked_lms_thr = 15; // TODO, OLSLO, magic to config
+    const float lms_ratio_thr = 0.9; // TODO, OLSLO, magic to config
 
     // 条件A1: 前回のキーフレーム挿入からmax_num_frames_以上経過していたらキーフレームを追加する
     const bool cond_a1 = frm_id_of_last_keyfrm_ + max_num_frms_ <= curr_frm.id_;
     // 条件A2: min_num_frames_以上経過していて,mapping moduleが待機状態であればキーフレームを追加する
     const bool cond_a2 = (frm_id_of_last_keyfrm_ + min_num_frms_ <= curr_frm.id_) && mapper_is_idle;
     // 条件A3: 前回のキーフレームから視点が移動してたらキーフレームを追加する
-    const bool cond_a3 = num_tracked_lms < num_reliable_lms * 0.25;
+    const bool cond_a3 = num_tracked_lms < num_reliable_lms * 0.25; // TODO, OLSLO, magic to config
 
     // 条件B: (キーフレーム追加の必要条件)3次元点が閾値以上観測されていて，3次元点との割合が一定割合以下であればキーフレームを追加する
     const bool cond_b = (num_tracked_lms_thr <= num_tracked_lms) && (num_tracked_lms < num_reliable_lms * lms_ratio_thr);

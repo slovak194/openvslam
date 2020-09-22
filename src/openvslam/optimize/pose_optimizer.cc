@@ -53,10 +53,10 @@ unsigned int pose_optimizer::optimize(data::frame& frm) const {
 
     // 有意水準5%のカイ2乗値
     // 自由度n=2
-    constexpr float chi_sq_2D = 5.99146;
+    constexpr float chi_sq_2D = 5.99146; // TODO, OLSLO, magic to config
     const float sqrt_chi_sq_2D = std::sqrt(chi_sq_2D);
     // 自由度n=3
-    constexpr float chi_sq_3D = 7.81473;
+    constexpr float chi_sq_3D = 7.81473; // TODO, OLSLO, magic to config
     const float sqrt_chi_sq_3D = std::sqrt(chi_sq_3D);
 
     for (unsigned int idx = 0; idx < num_keypts; ++idx) {

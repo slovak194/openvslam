@@ -419,7 +419,7 @@ bool tracking_module::optimize_current_frame_with_local_map() {
     }
 
     // TODO, OLSLO, magic to config
-    constexpr unsigned int num_tracked_lms_thr = 10/*20*/;
+    constexpr unsigned int num_tracked_lms_thr = 5/*20*/;
 
     // if recently relocalized, use the more strict threshold
     if (curr_frm_.id_ < last_reloc_frm_id_ + camera_->fps_ && num_tracked_lms_ < 2 * num_tracked_lms_thr) {
@@ -607,7 +607,7 @@ void tracking_module::search_local_landmarks() {
         }
 
         // check the observability
-        if (curr_frm_.can_observe(lm, 0.5, reproj, x_right, pred_scale_level)) {
+        if (curr_frm_.can_observe(lm, 0.5, reproj, x_right, pred_scale_level)) { // TODO, OLSLO, magic to config
             // pass the temporary variables
             lm->reproj_in_tracking_ = reproj;
             lm->x_right_in_tracking_ = x_right;
@@ -633,11 +633,12 @@ void tracking_module::search_local_landmarks() {
 
     // acquire more 2D-3D matches by projecting the local landmarks to the current frame
     match::projection projection_matcher(0.8);
-    const float margin = (curr_frm_.id_ < last_reloc_frm_id_ + 2)
+    const float margin = (curr_frm_.id_ < last_reloc_frm_id_ + 2) // TODO, OLSLO, magic to config
                              ? 20.0
                              : ((camera_->setup_type_ == camera::setup_type_t::RGBD)
                                     ? 10.0
                                     : 5.0);
+    spdlog::debug("search_local_landmarks::margin: {}", margin);
     projection_matcher.match_frame_and_landmarks(curr_frm_, local_landmarks_, margin);
 }
 

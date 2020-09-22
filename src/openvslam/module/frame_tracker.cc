@@ -25,7 +25,7 @@ bool frame_tracker::motion_based_track(data::frame& curr_frm, const data::frame&
     std::fill(curr_frm.landmarks_.begin(), curr_frm.landmarks_.end(), nullptr);
 
     // last frameで見えている3次元点を再投影して2D-3D対応を見つける
-    const float margin = (camera_->setup_type_ != camera::setup_type_t::Stereo) ? 20 : 10;
+    const float margin = (camera_->setup_type_ != camera::setup_type_t::Stereo) ? 20 : 10;  // TODO, OLSLO, magic to config
     auto num_matches = projection_matcher.match_current_and_last_frames(curr_frm, last_frm, margin);
 
     if (num_matches < num_matches_thr_) {
