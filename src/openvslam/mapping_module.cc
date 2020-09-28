@@ -231,6 +231,7 @@ void mapping_module::create_new_landmarks() {
             // if the scene scale is much smaller than the baseline, abort the triangulation
             const float median_depth_in_ngh = ngh_keyfrm->compute_median_depth(true);
             if (baseline_dist < 0.02 * median_depth_in_ngh) {
+                spdlog::debug("create_new_landmarks: Scene scale is much smaller than the baseline, abort the triangulation.");
                 continue;
             }
         }
@@ -260,7 +261,7 @@ void mapping_module::create_new_landmarks() {
 
 void mapping_module::triangulate_with_two_keyframes(data::keyframe* keyfrm_1, data::keyframe* keyfrm_2,
                                                     const std::vector<std::pair<unsigned int, unsigned int>>& matches) {
-    const module::two_view_triangulator triangulator(keyfrm_1, keyfrm_2, 1.0);
+    const module::two_view_triangulator triangulator(keyfrm_1, keyfrm_2, 0.0/*1.0*/);  // TODO, OLSLO, magic to config
 
 #ifdef USE_OPENMP
 #pragma omp parallel for

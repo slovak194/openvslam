@@ -28,10 +28,20 @@ bool frame_tracker::motion_based_track(data::frame& curr_frm, const data::frame&
     const float margin = (camera_->setup_type_ != camera::setup_type_t::Stereo) ? 20 : 10;  // TODO, OLSLO, magic to config
     auto num_matches = projection_matcher.match_current_and_last_frames(curr_frm, last_frm, margin);
 
+    spdlog::debug("motion_based_track: single margin matches {}", num_matches);
+
     if (num_matches < num_matches_thr_) {
         // marginを広げて再探索
         std::fill(curr_frm.landmarks_.begin(), curr_frm.landmarks_.end(), nullptr);
         num_matches = projection_matcher.match_current_and_last_frames(curr_frm, last_frm, 2 * margin);
+        spdlog::debug("motion_based_track: double margin matches {}", num_matches);
+    }
+
+    if (num_matches < num_matches_thr_) {
+        // marginを広げて再探索
+        std::fill(curr_frm.landmarks_.begin(), curr_frm.landmarks_.end(), nullptr);
+        num_matches = projection_matcher.match_current_and_last_frames(curr_frm, last_frm, 4 * margin);
+        spdlog::debug("motion_based_track: quadruple margin matches {}", num_matches);
     }
 
     if (num_matches < num_matches_thr_) {

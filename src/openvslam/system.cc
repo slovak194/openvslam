@@ -1,5 +1,6 @@
 #include "openvslam/system.h"
 #include "openvslam/config.h"
+#include "openvslam/data/landmark.h"
 #include "openvslam/tracking_module.h"
 #include "openvslam/mapping_module.h"
 #include "openvslam/global_optimization_module.h"
@@ -11,6 +12,8 @@
 #include "openvslam/io/map_database_io.h"
 #include "openvslam/publish/map_publisher.h"
 #include "openvslam/publish/frame_publisher.h"
+
+#include <nlohmann/json.hpp>
 
 #include <thread>
 
@@ -253,7 +256,7 @@ Mat44_t system::feed_multi_frame(const std::vector<cv::Mat> imgs, const std::vec
 
     check_reset_request();
 
-    const Mat44_t cam_pose_cw = tracker_->track_multi_image(imgs, timestamps, capture_ids, mask);
+    Mat44_t cam_pose_cw = tracker_->track_multi_image(imgs, timestamps, capture_ids, mask);
 
     frame_publisher_->update(tracker_);
     if (tracker_->tracking_state_ == tracker_state_t::Tracking) {
@@ -261,6 +264,66 @@ Mat44_t system::feed_multi_frame(const std::vector<cv::Mat> imgs, const std::vec
     }
 
     return cam_pose_cw;
+}
+
+void system::get_current_frame_filtered_landmarks(void){
+
+    auto tracker = this->tracker_;
+
+    const auto num_curr_keypts = tracker->curr_frm_.num_keypts_;
+    auto curr_keypts_ = tracker->curr_frm_.keypts_;
+//    auto elapsed_ms_ = tracker->elapsed_ms_;
+//    auto mapping_is_enabled_ = tracker->get_mapping_module_status();
+    auto tracking_state_ = tracker->last_tracking_state_;
+
+    auto is_tracked_ = std::vector<bool>(num_curr_keypts, false);
+
+    nlohmann::json json;
+    json["tracked_lms"] = nlohmann::json::array();
+
+    switch (tracking_state_) {
+        case tracker_state_t::Initializing: {
+//            auto init_keypts_ = tracker->get_initial_keypoints();
+//            init_matches_ = tracker->get_initial_matches();
+            break;
+        }
+        case tracker_state_t::Tracking: {
+            for (unsigned int i = 0; i < num_curr_keypts; ++i) {
+                auto lm = tracker->curr_frm_.landmarks_.at(i);
+                if (!lm) {
+                    continue;
+                }
+                if (tracker->curr_frm_.outlier_flags_.at(i)) {
+                    continue;
+                }
+
+                if (0 < lm->num_observations()) {
+                    is_tracked_.at(i) = true;
+                    json["tracked_lms"].push_back(lm->to_json());
+                }
+            }
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+
+    auto num_tracked = std::count_if(is_tracked_.begin(), is_tracked_.end(), [](bool x){return x;});
+
+//    spdlog::debug("get_current_frame_filtered_landmarks: tracked{}:{}", num_tracked, num_curr_keypts);
+
+//    tracker->curr_frm_.cam_pose_cw_
+
+    json["cam_pose_cw_"] = tracker->curr_frm_.cam_pose_cw_;
+    json["n_points"] = num_curr_keypts;
+    json["num_tracked"] = num_tracked;
+//      std::cout << json.dump() << std::endl;
+
+    const auto msgpack = nlohmann::json::to_msgpack(json);
+    std::ofstream("dump.msg", std::ios::app | std::ios::binary).write(
+        reinterpret_cast<const char *>(msgpack.data()), msgpack.size() * sizeof(uint8_t));
+
 }
 
 Mat44_t system::feed_stereo_frame(const cv::Mat& left_img, const cv::Mat& right_img, const double timestamp, const cv::Mat& mask) {

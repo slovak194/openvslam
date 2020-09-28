@@ -2,6 +2,8 @@
 #include "openvslam/data/landmark.h"
 #include "openvslam/module/local_map_cleaner.h"
 
+#include <spdlog/spdlog.h>
+
 namespace openvslam {
 namespace module {
 
@@ -13,9 +15,9 @@ void local_map_cleaner::reset() {
 }
 
 unsigned int local_map_cleaner::remove_redundant_landmarks(const unsigned int cur_keyfrm_id) {
-    constexpr float observed_ratio_thr = 0.3;
-    constexpr unsigned int num_reliable_keyfrms = 2;
-    const unsigned int num_obs_thr = is_monocular_ ? 2 : 3;
+    constexpr float observed_ratio_thr = 0.1; // TODO, OLSLO, magic to config
+    constexpr unsigned int num_reliable_keyfrms = 2; // TODO, OLSLO, magic to config
+    const unsigned int num_obs_thr = is_monocular_ ? 1 : 3;
 
     // states of observed landmarks
     enum class lm_state_t { Valid,
@@ -23,7 +25,11 @@ unsigned int local_map_cleaner::remove_redundant_landmarks(const unsigned int cu
                             NotClear };
 
     unsigned int num_removed = 0;
+    unsigned int num_bad_observed_ratio = 0;
+    unsigned int num_not_enough_observers = 0;
+    unsigned int num_not_clear = 0;
     auto iter = fresh_landmarks_.begin();
+    auto initial_lm_size = fresh_landmarks_.size();
     while (iter != fresh_landmarks_.end()) {
         auto lm = *iter;
 
@@ -38,12 +44,14 @@ unsigned int local_map_cleaner::remove_redundant_landmarks(const unsigned int cu
             // if `lm` is not reliable
             // remove `lm` from the buffer and the database
             lm_state = lm_state_t::Invalid;
+            num_bad_observed_ratio++;
         }
         else if (num_reliable_keyfrms + lm->first_keyfrm_id_ <= cur_keyfrm_id
                  && lm->num_observations() <= num_obs_thr) {
             // if the number of the observers of `lm` is small after some keyframes were inserted
             // remove `lm` from the buffer and the database
             lm_state = lm_state_t::Invalid;
+            num_not_enough_observers++;
         }
         else if (num_reliable_keyfrms + 1U + lm->first_keyfrm_id_ <= cur_keyfrm_id) {
             // if the number of the observers of `lm` is sufficient after some keyframes were inserted
@@ -61,11 +69,16 @@ unsigned int local_map_cleaner::remove_redundant_landmarks(const unsigned int cu
             iter = fresh_landmarks_.erase(iter);
         }
         else {
+            num_not_clear++;
             // hold decision because the state is NotClear
             iter++;
         }
     }
 
+//    spdlog::debug("remove_redundant_landmarks num_removed: {}-{}={}", initial_lm_size, num_removed, initial_lm_size-num_removed);
+//    spdlog::debug("\tnum_bad_observed_ratio = {}", num_bad_observed_ratio);
+//    spdlog::debug("\tnum_not_enough_observers = {}", num_not_enough_observers);
+//    spdlog::debug("\tnum_not_clear = {}", num_not_clear);
     return num_removed;
 }
 

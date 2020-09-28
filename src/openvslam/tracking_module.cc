@@ -24,7 +24,8 @@ tracking_module::tracking_module(const std::shared_ptr<config>& cfg, system* sys
       initializer_(cfg->camera_->setup_type_, map_db, bow_db, cfg->yaml_node_),
       frame_tracker_(camera_, 5/*10*/), // TODO, OLSLO, magic to config
       relocalizer_(bow_db_), pose_optimizer_(),
-      keyfrm_inserter_(cfg_->camera_->setup_type_, cfg_->true_depth_thr_max_, cfg_->true_depth_thr_min_, map_db, bow_db, 0, cfg_->camera_->fps_) {
+      keyfrm_inserter_(cfg_->camera_->setup_type_, cfg_->true_depth_thr_max_, cfg_->true_depth_thr_min_, map_db, bow_db, 0, cfg_->camera_->fps_/3 // TODO, OLSLO, magic to config
+                       ) {
     spdlog::debug("CONSTRUCT: tracking_module");
 
     extractor_left_ = new feature::orb_extractor(cfg_->orb_params_);
@@ -156,12 +157,12 @@ Mat44_t tracking_module::track_multi_image(const std::vector<cv::Mat> imgs, cons
   if (camera_->setup_type_ == camera::setup_type_t::Monocular) {
     // create current frame object
     if (tracking_state_ == tracker_state_t::NotInitialized || tracking_state_ == tracker_state_t::Initializing) {
-      curr_frm_ = data::frame(img_gray_, timestamps[2], ini_extractor_left_,
+      curr_frm_ = data::frame(img_gray_, timestamps[cam_id], ini_extractor_left_,
                               bow_vocab_, camera_,
                               cfg_->true_depth_thr_max_, cfg_->true_depth_thr_min_, mask);
     }
     else {
-      curr_frm_ = data::frame(img_gray_, timestamps[2], extractor_left_, bow_vocab_,
+      curr_frm_ = data::frame(img_gray_, timestamps[cam_id], extractor_left_, bow_vocab_,
                               camera_, cfg_->true_depth_thr_max_, cfg_->true_depth_thr_min_, mask);
     }
   } else if (camera_->setup_type_ == camera::setup_type_t::Stereo) {
@@ -518,7 +519,7 @@ void tracking_module::update_local_keyframes() {
         auto keyfrm = *iter;
 
         // covisibilities of the neighbor keyframe
-        const auto neighbors = keyfrm->graph_node_->get_top_n_covisibilities(10);
+        const auto neighbors = keyfrm->graph_node_->get_top_n_covisibilities(10);// TODO, OLSLO, magic to config
         for (auto neighbor : neighbors) {
             if (add_local_keyframe(neighbor)) {
                 break;
@@ -635,7 +636,6 @@ void tracking_module::search_local_landmarks() {
                              : ((camera_->setup_type_ == camera::setup_type_t::RGBD)
                                     ? 10.0
                                     : 5.0);
-    spdlog::debug("search_local_landmarks::margin: {}", margin);
     projection_matcher.match_frame_and_landmarks(curr_frm_, local_landmarks_, margin);
 }
 

@@ -4,6 +4,8 @@
 #include "openvslam/data/map_database.h"
 #include "openvslam/module/keyframe_inserter.h"
 
+#include <spdlog/spdlog.h>
+
 namespace openvslam {
 namespace module {
 
@@ -40,7 +42,7 @@ bool keyframe_inserter::new_keyframe_is_needed(const data::frame& curr_frm, cons
     const bool mapper_is_idle = mapper_->get_keyframe_acceptability();
 
     // 最新のキーフレームで観測している3次元点数に対する，現在のフレームで観測している3次元点数の割合の閾値
-    constexpr unsigned int num_tracked_lms_thr = 15; // TODO, OLSLO, magic to config
+    constexpr unsigned int num_tracked_lms_thr = 5; // TODO, OLSLO, magic to config
     const float lms_ratio_thr = 0.9; // TODO, OLSLO, magic to config
 
     // 条件A1: 前回のキーフレーム挿入からmax_num_frames_以上経過していたらキーフレームを追加する
@@ -51,7 +53,15 @@ bool keyframe_inserter::new_keyframe_is_needed(const data::frame& curr_frm, cons
     const bool cond_a3 = num_tracked_lms < num_reliable_lms * 0.25; // TODO, OLSLO, magic to config
 
     // 条件B: (キーフレーム追加の必要条件)3次元点が閾値以上観測されていて，3次元点との割合が一定割合以下であればキーフレームを追加する
-    const bool cond_b = (num_tracked_lms_thr <= num_tracked_lms) && (num_tracked_lms < num_reliable_lms * lms_ratio_thr);
+    const bool cond_b1 = (num_tracked_lms_thr <= num_tracked_lms);
+    const bool cond_b2 = true/*(num_tracked_lms < num_reliable_lms * lms_ratio_thr)*/; // TODO, OLSLO, check if this requirement is to severe.
+    const bool cond_b = cond_b1 && cond_b2;
+
+    spdlog::debug("new_keyframe_is_needed: cond_a1: {}\tcond_a2: {}\tcond_a3: {}\tcond_b1: {}\tcond_b2: {}\tmapper_is_idle: {}",
+                  cond_a1, cond_a2, cond_a3, cond_b1, cond_b2, mapper_is_idle);
+
+    spdlog::debug("num_tracked_lms({}), num_reliable_lms({})", num_tracked_lms, num_reliable_lms);
+
 
     // Bが満たされていなければ追加しない
     if (!cond_b) {

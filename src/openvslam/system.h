@@ -113,9 +113,12 @@ public:
     //! (Note: RGB and Depth images must be aligned)
     Mat44_t feed_RGBD_frame(const cv::Mat& rgb_img, const cv::Mat& depthmap, const double timestamp, const cv::Mat& mask = cv::Mat{});
 
+    // Dev
     //! Feed a multi frame to SLAM system
     //! (NOTE: distorted images are acceptable if calibrated)
     Mat44_t feed_multi_frame(const std::vector<cv::Mat> imgs, const std::vector<double> timestamps, const std::vector<std::uint32_t> capture_ids, const cv::Mat& mask = cv::Mat{});
+
+    void get_current_frame_filtered_landmarks(void);
 
     //-----------------------------------------
     // management for pause
